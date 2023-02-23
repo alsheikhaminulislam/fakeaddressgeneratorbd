@@ -25,20 +25,15 @@ var obj = {
     CVV: "",
 }
 app.get('/', (req, res) => {
-    res.send("Hello");
-})
-app.get('/get', (req, res) => {
     getaxios((response) => {
         let jsonx = JSON.stringify(response, null, 4);
         fs.readFile(JsonApplicationPath, function (err, data) {
             var json = JSON.parse(data)
             json[json.length] = response
             res.header("Content-Type", 'application/json');
-            res.send(JSON.stringify(response, null, 4));
-            console.log(json.length);
+            res.send(JSON.stringify(response, null, 4)); 
             for (let index = 0; index < json.length; index++) {
-                const element = json[index];
-
+                const element = json[index]; 
                 if (json.length == 1) {
                     fs.writeFile(JsonApplicationPath, JSON.stringify(json, null, 4), 'utf8', function (c) { });
                 }else{
