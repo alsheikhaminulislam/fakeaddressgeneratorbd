@@ -3,8 +3,8 @@ const express = require('express')
 const axios = require('axios')
 const cheerio = require('cheerio')
 const app = express()
-const fs = require('fs') 
-const article = [] 
+const fs = require('fs')
+const article = []
 const JsonApplicationPath = "myjsondata.json"
 var obj = {
     Street: "",
@@ -23,42 +23,48 @@ var obj = {
     Credit_card_number: "",
     Expire: "",
     CVV: "",
-} 
-app.get('/', (req, res) => { 
+}
+app.get('/', (req, res) => {
     res.send("Hello");
 })
-app.get('/get', (req, res) => { 
-    getaxios((response)=>{  
-        let jsonx = JSON.stringify(response, null, 4); 
+app.get('/get', (req, res) => {
+    getaxios((response) => {
+        let jsonx = JSON.stringify(response, null, 4);
         fs.readFile(JsonApplicationPath, function (err, data) {
-            var json = JSON.parse(data) 
-            json[json.length]=response
-            res.header("Content-Type",'application/json');
+            var json = JSON.parse(data)
+            json[json.length] = response
+            res.header("Content-Type", 'application/json');
             res.send(JSON.stringify(response, null, 4));
+            console.log(json.length);
             for (let index = 0; index < json.length; index++) {
                 const element = json[index];
-                if(response.Credit_card_number != element.Credit_card_number){
+
+                if (json.length == 1) {
                     fs.writeFile(JsonApplicationPath, JSON.stringify(json, null, 4), 'utf8', function (c) { });
+                }else{
+                    if (response.Credit_card_number != element.Credit_card_number) {
+                        fs.writeFile(JsonApplicationPath, JSON.stringify(json, null, 4), 'utf8', function (c) { });
+                    }
                 }
             }
-        }) 
+        })
     })
 })
-app.get('/getall', (req, res) => { 
-    getaxios((response)=>{   
-        fs.readFile(JsonApplicationPath, function (err, data) { 
-            res.header("Content-Type",'application/json');
-            res.send(JSON.stringify(JSON.parse(data) , null, 4));
-        }) 
+app.get('/getall', (req, res) => {
+    getaxios((response) => {
+        fs.readFile(JsonApplicationPath, function (err, data) {
+            res.header("Content-Type", 'application/json');
+            res.send(JSON.stringify(JSON.parse(data), null, 4));
+        })
     })
 })
 
 
-function getaxios(res){
+function getaxios(res) {
     axios.get("https://www.fakexy.com/bd-fake-address-generator-ddhaakaa-bibhaag")
-        .then(response => { 
+        .then(response => {
             const html = response.data
-            const $ = cheerio.load(html) 
+            const $ = cheerio.load(html)
             $('tbody > tr').each((index, element) => {
                 var tr0 = $(element).find("td")[0]
                 var tr1 = $(element).find("td")[1]
@@ -94,13 +100,14 @@ function getaxios(res){
                     obj.Expire = $(tr1).text()
                 } else if (index == 15) {
                     obj.CVV = $(tr1).text()
-                } 
+                }
                 article.push(
                     obj
                 )
-    
+
             })
-    return res && res(article[0]); })
+            return res && res(article[0]);
+        })
 }
 
 app.listen(PORT, () => console.log(`server running on PORT ${PORT}`))
